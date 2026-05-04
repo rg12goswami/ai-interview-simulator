@@ -30,7 +30,10 @@ mongoose.connect(process.env.MONGO_URI)
 // ========================
 // MIDDLEWARE
 // ========================
-app.use(cors());
+app.use(cors({
+  origin: "https://ai-interview-simulator-pqe8qkurt-rg12goswamis-projects.vercel.app",
+  credentials: true
+}));
 app.use(express.json());
 
 // ========================
