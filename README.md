@@ -93,7 +93,7 @@ AI-Interview-Simulator/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/AI-Interview-Simulator.git
+git clone https://github.com/rg12goswami/ai-interview-simulator.git
 ```
 
 ### 2. Navigate into the project
