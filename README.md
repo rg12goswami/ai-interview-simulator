@@ -47,17 +47,20 @@ An AI-powered mock interview platform that helps developers practice technical i
 
 ### Login Page
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/89753965-a477-4944-b8eb-64c3aba9c433" />
+<img width="1916" height="861" alt="image" src="https://github.com/user-attachments/assets/74e64c60-bbc3-4e24-a261-3cd0eeb4316a" />
+
 
 
 ### Interview Interface
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/cd07265e-752f-4434-a26f-8252c64943b7" />
+<img width="1895" height="841" alt="image" src="https://github.com/user-attachments/assets/ce0558a9-b5b7-4890-99c2-79144c78308b" />
 
 
 ### Analytics Dashboard
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e5f6d865-a488-4526-921e-033ff3110a03" />
+<img width="1876" height="856" alt="image" src="https://github.com/user-attachments/assets/4321e872-ded8-4404-acf8-4c6d24005ac1" />
+<img width="1877" height="841" alt="image" src="https://github.com/user-attachments/assets/452f04bf-caec-4280-9bc8-5bc1cf7fa980" />
+
 
 
 ---
