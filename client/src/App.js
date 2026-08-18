@@ -66,7 +66,7 @@ useEffect(() => {
   const [currentQ, setCurrentQ] = useState(1);
 
   // 🔥 NEW STATES
-  const [data, setData] = useState([]);
+
   const [scores, setScores] = useState([]);
   const [results, setResults] = useState([]);
   const [time, setTime] = useState(30);
@@ -209,23 +209,17 @@ const fetchDailyAnalysis = async () => {
     // 🔥 safety check
     if (!res.data || res.data.length === 0) {
       setResults([]);
-      setData([]);
+    
       return;
     }
 
     setResults(res.data);
 
-    const formatted = res.data.map((item, index) => ({
-      name: `Q${index + 1}`,
-      score: item.score,
-    }));
-
-    setData(formatted);
 
   } catch (err) {
     console.log("Fetch error:", err);
     setResults([]);
-    setData([]);
+    
   }
 };
 
