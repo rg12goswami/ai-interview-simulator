@@ -31,7 +31,22 @@ mongoose.connect(process.env.MONGO_URI)
 // MIDDLEWARE
 // ========================
 app.use(cors({
-  origin: "https://ai-interview-simulator-pqe8qkurt-rg12goswamis-projects.vercel.app",
+  origin: (origin, callback) => {
+    // allow requests with no origin (e.g. curl, mobile apps)
+    if (!origin) return callback(null, true);
+
+    // allow any deployment under your Vercel project (preview + production)
+    if (/^https:\/\/ai-interview-simulator.*\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    // allow local development
+    if (origin === "http://localhost:3000") {
+      return callback(null, true);
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
   credentials: true
 }));
 app.use(express.json());
