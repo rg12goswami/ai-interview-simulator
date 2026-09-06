@@ -6,16 +6,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#0E1116",
-        surface: "#161A21",
-        surface2: "#1D222B",
-        edge: "#262B35",
-        mint: {
-          DEFAULT: "#3DDC97",
-          dim: "#2BB57D",
+        // warm, muted "editorial" theme
+        ink: "#FDF8F0",        // page background + text on filled accent buttons
+        surface: "#FFFFFF",    // card background
+        surface2: "#FBF1E4",   // secondary/stat card background
+        edge: "#E8DCC8",       // borders
+        accent: {
+          DEFAULT: "#D85A30",  // primary action color (coral/rust)
+          dim: "#B84A26",      // hover state
         },
-        amber: "#F5A524",
-        coral: "#F0546B",
+        amber: "#C97D1D",      // secondary accent (medium warning, secondary stat)
+        danger: "#B23B3B",     // weak areas / low score / urgent timer
+        gray: {
+          50: "#2A1F14",
+          100: "#3A2C1E",
+          200: "#4E3C29",
+          300: "#6B5744",
+          400: "#8A7460",
+          500: "#9C8873",
+          600: "#C9BCA9",
+        },
       },
       fontFamily: {
         display: ['"Space Grotesk"', "sans-serif"],

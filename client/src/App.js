@@ -88,7 +88,7 @@ useEffect(() => {
     return `${m}:${sec}`;
   };
   const timerColor =
-    time <= 10 ? "text-coral" : time <= 20 ? "text-amber" : "text-mint";
+    time <= 10 ? "text-danger" : time <= 20 ? "text-amber" : "text-accent";
 
   // score for this session, per question (independent of the /results endpoint)
   const sessionScoreData = scores.map((s, i) => ({
@@ -341,7 +341,7 @@ setStartTime(Date.now());
             className="flex items-center gap-2 font-display text-[15px] font-semibold text-gray-100 cursor-pointer"
             onClick={() => setView("home")}
           >
-            <span className="text-mint font-mono">{"{ }"}</span>
+            <span className="text-accent font-mono">{"{ }"}</span>
             AI Interview Simulator
           </span>
 
@@ -369,7 +369,7 @@ setStartTime(Date.now());
 
             {!isAuthenticated ? (
               <button
-                className="text-sm font-medium bg-mint text-ink px-4 py-2 rounded-lg hover:bg-mint-dim transition-colors"
+                className="text-sm font-medium bg-accent text-ink px-4 py-2 rounded-lg hover:bg-accent-dim transition-colors"
                 onClick={() => {
                   setIsLogin(true);
                   setView("login");
@@ -379,7 +379,7 @@ setStartTime(Date.now());
               </button>
             ) : (
               <button
-                className="text-sm font-medium border border-edge text-gray-300 px-4 py-2 rounded-lg hover:border-gray-500 hover:text-white transition-colors"
+                className="text-sm font-medium border border-edge text-gray-300 px-4 py-2 rounded-lg hover:border-gray-500 hover:text-gray-100 transition-colors"
                 onClick={logoutUser}
               >
                 Log out
@@ -395,7 +395,7 @@ setStartTime(Date.now());
       {view === "home" && (
         <div className="grid lg:grid-cols-2 gap-14 items-center py-20 lg:py-28">
           <div>
-            <p className="font-mono text-xs tracking-widest text-mint uppercase mb-4">
+            <p className="font-mono text-xs tracking-widest text-accent uppercase mb-4">
               AI-powered practice
             </p>
             <h1 className="font-display text-4xl sm:text-5xl font-semibold text-gray-50 leading-tight mb-5">
@@ -407,34 +407,39 @@ setStartTime(Date.now());
               confidence — then track your progress over time.
             </p>
             <button
-              className="bg-mint text-ink font-medium px-6 py-3 rounded-lg hover:bg-mint-dim transition-colors"
+              className="bg-accent text-ink font-medium px-6 py-3 rounded-lg hover:bg-accent-dim transition-colors"
               onClick={goToPractice}
             >
               {isAuthenticated ? "Start practicing" : "Get started"}
             </button>
           </div>
 
-          <div className="rounded-xl border border-edge bg-surface overflow-hidden">
-            <div className="flex items-center gap-1.5 px-4 py-3 border-b border-edge">
-              <span className="w-2.5 h-2.5 rounded-full bg-coral/60" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber/60" />
-              <span className="w-2.5 h-2.5 rounded-full bg-mint/60" />
-            </div>
-            <div className="p-5 font-mono text-[13px] leading-relaxed">
-              <p className="text-gray-500">$ interview --role=backend</p>
-              <p className="text-gray-200 mt-3">
-                &gt; Explain how a database index speeds up a query, and
-                when it can hurt write performance.
-              </p>
-              <p className="text-gray-500 mt-3">
-                score: <span className="text-mint">8/10</span>
-              </p>
-              <p className="text-gray-500 mt-1">
-                weak area: <span className="text-coral">none flagged</span>
-              </p>
-              <p className="text-gray-600 mt-3">
-                _<span className="animate-blink">|</span>
-              </p>
+          <div className="rounded-xl border border-edge bg-surface p-7">
+            <p className="font-mono text-xs tracking-widest text-accent uppercase mb-5">
+              How it works
+            </p>
+            <div className="space-y-5">
+              <div className="flex gap-4">
+                <span className="font-display text-lg font-semibold text-accent shrink-0">01</span>
+                <div>
+                  <p className="text-gray-100 font-medium text-sm mb-0.5">Pick a role or stack</p>
+                  <p className="text-gray-400 text-sm leading-relaxed">Frontend, backend, data science, or type in anything.</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <span className="font-display text-lg font-semibold text-accent shrink-0">02</span>
+                <div>
+                  <p className="text-gray-100 font-medium text-sm mb-0.5">Answer timed questions</p>
+                  <p className="text-gray-400 text-sm leading-relaxed">Real interview pressure, real thinking time.</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <span className="font-display text-lg font-semibold text-accent shrink-0">03</span>
+                <div>
+                  <p className="text-gray-100 font-medium text-sm mb-0.5">Get structured feedback</p>
+                  <p className="text-gray-400 text-sm leading-relaxed">Scores, confidence, and weak areas — tracked over time.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -457,7 +462,7 @@ setStartTime(Date.now());
               <input
                 type="text"
                 placeholder="Name"
-                className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-3 outline-none focus:border-mint transition-colors"
+                className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-3 outline-none focus:border-accent transition-colors"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -466,7 +471,7 @@ setStartTime(Date.now());
             <input
               type="email"
               placeholder="Email"
-              className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-3 outline-none focus:border-mint transition-colors"
+              className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-3 outline-none focus:border-accent transition-colors"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -474,13 +479,13 @@ setStartTime(Date.now());
             <input
               type="password"
               placeholder="Password"
-              className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-5 outline-none focus:border-mint transition-colors"
+              className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-5 outline-none focus:border-accent transition-colors"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
 
             <button
-              className="w-full bg-mint text-ink font-medium py-2.5 rounded-lg hover:bg-mint-dim transition-colors"
+              className="w-full bg-accent text-ink font-medium py-2.5 rounded-lg hover:bg-accent-dim transition-colors"
               onClick={isLogin ? loginUser : signupUser}
             >
               {isLogin ? "Log in" : "Sign up"}
@@ -510,7 +515,7 @@ setStartTime(Date.now());
           </span>
           <div className="flex-1 mx-4 h-1.5 bg-edge rounded-full overflow-hidden">
             <div
-              className="h-full bg-mint rounded-full transition-all"
+              className="h-full bg-accent rounded-full transition-all"
               style={{ width: `${(currentQ / TOTAL_QUESTIONS) * 100}%` }}
             />
           </div>
@@ -526,7 +531,7 @@ setStartTime(Date.now());
         {/* ROLE */}
         {step === 1 && (
           <>
-            <p className="font-mono text-xs tracking-widest text-mint uppercase mb-2">
+            <p className="font-mono text-xs tracking-widest text-accent uppercase mb-2">
               Step 1
             </p>
             <h2 className="font-display text-xl font-semibold text-gray-50 mb-5">
@@ -536,7 +541,7 @@ setStartTime(Date.now());
             <input
               type="text"
               placeholder="Search roles..."
-              className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-4 outline-none focus:border-mint transition-colors"
+              className="w-full bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 mb-4 outline-none focus:border-accent transition-colors"
               value={roleSearch}
               onChange={(e) => setRoleSearch(e.target.value)}
             />
@@ -545,7 +550,7 @@ setStartTime(Date.now());
               {filteredRoles.map((r) => (
                 <button
                   key={r}
-                  className="text-left text-sm text-gray-300 border border-edge rounded-lg px-3 py-2.5 hover:border-mint hover:text-mint hover:bg-mint/5 transition-colors"
+                  className="text-left text-sm text-gray-300 border border-edge rounded-lg px-3 py-2.5 hover:border-accent hover:text-accent hover:bg-accent/5 transition-colors"
                   onClick={() => startInterview(r)}
                 >
                   {r}
@@ -566,12 +571,12 @@ setStartTime(Date.now());
                 <input
                   type="text"
                   placeholder="e.g. Rust Developer"
-                  className="flex-1 bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 outline-none focus:border-mint transition-colors"
+                  className="flex-1 bg-ink/60 border border-edge rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder:text-gray-600 outline-none focus:border-accent transition-colors"
                   value={customRole}
                   onChange={(e) => setCustomRole(e.target.value)}
                 />
                 <button
-                  className="bg-mint text-ink text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-mint-dim disabled:opacity-40 disabled:hover:bg-mint transition-colors"
+                  className="bg-accent text-ink text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-accent-dim disabled:opacity-40 disabled:hover:bg-accent transition-colors"
                   disabled={!customRole.trim()}
                   onClick={() => startInterview(customRole.trim())}
                 >
@@ -585,7 +590,7 @@ setStartTime(Date.now());
         {/* QUESTION */}
         {step === 3 && (
           <>
-            <p className="font-mono text-xs tracking-widest text-mint uppercase mb-2">
+            <p className="font-mono text-xs tracking-widest text-accent uppercase mb-2">
               {role}
             </p>
             <div className="rounded-xl border border-edge bg-ink/40 p-4 mb-4">
@@ -595,7 +600,7 @@ setStartTime(Date.now());
             </div>
 
             <textarea
-              className="w-full bg-ink/60 border border-edge rounded-lg p-3 text-sm text-gray-100 placeholder:text-gray-600 outline-none focus:border-mint transition-colors min-h-[120px] mb-3"
+              className="w-full bg-ink/60 border border-edge rounded-lg p-3 text-sm text-gray-100 placeholder:text-gray-600 outline-none focus:border-accent transition-colors min-h-[120px] mb-3"
               placeholder="Type your answer..."
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
@@ -603,13 +608,13 @@ setStartTime(Date.now());
 
             <div className="flex gap-3">
               <button
-                className="flex-1 border border-edge text-gray-300 text-sm font-medium py-2.5 rounded-lg hover:border-gray-500 hover:text-white transition-colors"
+                className="flex-1 border border-edge text-gray-300 text-sm font-medium py-2.5 rounded-lg hover:border-gray-500 hover:text-gray-100 transition-colors"
                 onClick={startListening}
               >
                 Speak answer
               </button>
               <button
-                className="flex-1 bg-mint text-ink text-sm font-medium py-2.5 rounded-lg hover:bg-mint-dim transition-colors"
+                className="flex-1 bg-accent text-ink text-sm font-medium py-2.5 rounded-lg hover:bg-accent-dim transition-colors"
                 onClick={submitAnswer}
               >
                 Submit
@@ -621,14 +626,14 @@ setStartTime(Date.now());
         {/* FEEDBACK */}
         {step === 4 && (
           <>
-            <p className="font-mono text-xs tracking-widest text-mint uppercase mb-2">
+            <p className="font-mono text-xs tracking-widest text-accent uppercase mb-2">
               Feedback
             </p>
             <div className="whitespace-pre-wrap break-words text-[13px] leading-relaxed text-gray-300 font-mono bg-ink/40 border border-edge p-4 rounded-xl max-h-72 overflow-y-auto">
               {feedback}
             </div>
             <button
-              className="mt-4 w-full bg-mint text-ink text-sm font-medium py-2.5 rounded-lg hover:bg-mint-dim transition-colors"
+              className="mt-4 w-full bg-accent text-ink text-sm font-medium py-2.5 rounded-lg hover:bg-accent-dim transition-colors"
               onClick={() => {
                 if (currentQ < TOTAL_QUESTIONS) {
                   setCurrentQ(currentQ + 1);
@@ -653,7 +658,7 @@ setStartTime(Date.now());
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
             <div>
-              <p className="font-mono text-xs tracking-widest text-mint uppercase mb-2">
+              <p className="font-mono text-xs tracking-widest text-accent uppercase mb-2">
                 Session complete
               </p>
               <h2 className="font-display text-2xl sm:text-3xl font-semibold text-gray-50">
@@ -662,13 +667,13 @@ setStartTime(Date.now());
             </div>
             <div className="flex gap-3">
               <button
-                className="border border-edge text-gray-300 text-sm font-medium px-4 py-2.5 rounded-lg hover:border-gray-500 hover:text-white transition-colors"
+                className="border border-edge text-gray-300 text-sm font-medium px-4 py-2.5 rounded-lg hover:border-gray-500 hover:text-gray-100 transition-colors"
                 onClick={goToDashboardStats}
               >
                 View dashboard
               </button>
               <button
-                className="bg-mint text-ink text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-mint-dim transition-colors"
+                className="bg-accent text-ink text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-accent-dim transition-colors"
                 onClick={() => {
                   setStep(1);
                   setCurrentQ(1);
@@ -686,7 +691,7 @@ setStartTime(Date.now());
               <p className="font-mono text-[11px] tracking-widest text-gray-500 uppercase mb-1">
                 Average score
               </p>
-              <p className="font-display text-3xl font-semibold text-mint">
+              <p className="font-display text-3xl font-semibold text-accent">
                 {avg}
                 <span className="text-sm text-gray-500">/10</span>
               </p>
@@ -721,10 +726,10 @@ setStartTime(Date.now());
                   key={i}
                   className={`font-mono text-xs px-2.5 py-1 rounded-md border ${
                     s >= 7
-                      ? "border-mint/40 text-mint bg-mint/5"
+                      ? "border-accent/40 text-accent bg-accent/5"
                       : s >= 4
                       ? "border-amber/40 text-amber bg-amber/5"
-                      : "border-coral/40 text-coral bg-coral/5"
+                      : "border-danger/40 text-danger bg-danger/5"
                   }`}
                 >
                   Q{i + 1} · {s}/10
@@ -734,11 +739,11 @@ setStartTime(Date.now());
             <div className="flex justify-center">
               {sessionScoreData.length > 0 ? (
                 <LineChart width={560} height={200} data={sessionScoreData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#262B35" />
-                  <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
-                  <YAxis stroke="#6B7280" fontSize={12} domain={[0, 10]} />
-                  <Tooltip contentStyle={{ background: "#1D222B", border: "1px solid #262B35", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#E5E7EB" }} />
-                  <Line type="monotone" dataKey="score" stroke="#3DDC97" strokeWidth={2} dot={{ fill: "#3DDC97", r: 3 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E8DCC8" />
+                  <XAxis dataKey="name" stroke="#8A7460" fontSize={12} />
+                  <YAxis stroke="#8A7460" fontSize={12} domain={[0, 10]} />
+                  <Tooltip contentStyle={{ background: "#FFFFFF", border: "1px solid #E8DCC8", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#3A2C1E" }} />
+                  <Line type="monotone" dataKey="score" stroke="#D85A30" strokeWidth={2} dot={{ fill: "#D85A30", r: 3 }} />
                 </LineChart>
               ) : (
                 <p className="text-gray-500 text-sm py-10">No data available</p>
@@ -756,11 +761,11 @@ setStartTime(Date.now());
             </p>
             <div className="flex justify-center">
               <BarChart width={560} height={200} data={timeTakenData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#262B35" />
-                <XAxis dataKey="name" stroke="#6B7280" fontSize={12} />
-                <YAxis stroke="#6B7280" fontSize={12} />
-                <Tooltip contentStyle={{ background: "#1D222B", border: "1px solid #262B35", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#E5E7EB" }} />
-                <Bar dataKey="time" fill="#F5A524" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E8DCC8" />
+                <XAxis dataKey="name" stroke="#8A7460" fontSize={12} />
+                <YAxis stroke="#8A7460" fontSize={12} />
+                <Tooltip contentStyle={{ background: "#FFFFFF", border: "1px solid #E8DCC8", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#3A2C1E" }} />
+                <Bar dataKey="time" fill="#C97D1D" radius={[4, 4, 0, 0]} />
               </BarChart>
             </div>
           </div>
@@ -773,7 +778,7 @@ setStartTime(Date.now());
   {/* DASHBOARD: weak areas + daily analysis, available any time via navbar */}
   {view === "stats" && isAuthenticated && (
     <div className="py-14 max-w-3xl mx-auto">
-      <p className="font-mono text-xs tracking-widest text-mint uppercase mb-2">
+      <p className="font-mono text-xs tracking-widest text-accent uppercase mb-2">
         Your dashboard
       </p>
       <h2 className="font-display text-2xl font-semibold text-gray-50 mb-8">
@@ -784,13 +789,13 @@ setStartTime(Date.now());
       <div className="rounded-xl border border-edge bg-surface p-5 mb-6">
         <p className="text-sm font-medium text-gray-300 mb-4">Weak areas</p>
         {weak && weak.length === 0 ? (
-          <p className="text-mint text-sm">No weak areas flagged yet.</p>
+          <p className="text-accent text-sm">No weak areas flagged yet.</p>
         ) : (
           <div className="space-y-2">
             {weak.map((w, i) => (
               <p
                 key={i}
-                className="text-sm text-gray-300 border-l-2 border-coral bg-coral/5 pl-3 py-1.5 rounded-r"
+                className="text-sm text-gray-300 border-l-2 border-danger bg-danger/5 pl-3 py-1.5 rounded-r"
               >
                 {w.question}
               </p>
@@ -807,11 +812,11 @@ setStartTime(Date.now());
         <div className="flex justify-center">
           {dailyData && dailyData.length > 0 ? (
             <LineChart width={560} height={220} data={dailyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#262B35" />
-              <XAxis dataKey="date" stroke="#6B7280" fontSize={12} />
-              <YAxis stroke="#6B7280" fontSize={12} />
-              <Tooltip contentStyle={{ background: "#1D222B", border: "1px solid #262B35", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#E5E7EB" }} />
-              <Line type="monotone" dataKey="avgScore" stroke="#3DDC97" strokeWidth={2} dot={{ fill: "#3DDC97", r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E8DCC8" />
+              <XAxis dataKey="date" stroke="#8A7460" fontSize={12} />
+              <YAxis stroke="#8A7460" fontSize={12} />
+              <Tooltip contentStyle={{ background: "#FFFFFF", border: "1px solid #E8DCC8", borderRadius: 8, fontSize: 12 }} labelStyle={{ color: "#3A2C1E" }} />
+              <Line type="monotone" dataKey="avgScore" stroke="#D85A30" strokeWidth={2} dot={{ fill: "#D85A30", r: 3 }} />
             </LineChart>
           ) : (
             <p className="text-gray-500 text-sm py-10">No sessions yet — complete an interview to see progress here.</p>
