@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import jsPDF from "jspdf";
 import { LineChart, Line, XAxis, YAxis , Tooltip,
   CartesianGrid , Bar ,BarChart } from "recharts";
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -47,6 +50,19 @@ const [isAuthenticated, setIsAuthenticated] = useState(false);
     r.toLowerCase().includes(roleSearch.toLowerCase())
   );
   const [question, setQuestion] = useState("");
+
+  // resume-tailored interview
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeText, setResumeText] = useState("");
+  const [resumeMode, setResumeMode] = useState(false);
+  const [resumeUploading, setResumeUploading] = useState(false);
+  const [askedQuestions, setAskedQuestions] = useState([]);
+
+  // full session transcript, for the PDF export
+  const [sessionLog, setSessionLog] = useState([]);
+
+  // text-to-speech
+  const [ttsEnabled, setTtsEnabled] = useState(true);
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
   const [timeLeft, setTimeLeft] = useState(30);
@@ -102,7 +118,7 @@ useEffect(() => {
   const loginUser = async () => {
   try {
     const res = await axios.post(
-      "https://ai-interview-simulator-aknp.onrender.com/login",
+      `${API_URL}/login`,
       {
         email,
         password,
@@ -168,7 +184,7 @@ const goToDashboardStats = () => {
 const signupUser = async () => {
   try {
     await axios.post(
-      "https://ai-interview-simulator-aknp.onrender.com/signup",
+      `${API_URL}/signup`,
       {
         name,
         email,
@@ -190,10 +206,10 @@ const fetchDailyAnalysis = async () => {
   const token = localStorage.getItem("token");
 
   const res = await axios.get(
-    "https://ai-interview-simulator-aknp.onrender.com/daily-analysis",
+    `${API_URL}/daily-analysis`,
     {
       headers: {
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
       },
     }
   );
@@ -204,7 +220,12 @@ const fetchDailyAnalysis = async () => {
   // 📊 FETCH RESULTS
   const fetchResults = async () => {
   try {
-    const res = await axios.get("https://ai-interview-simulator-aknp.onrender.com/results");
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`${API_URL}/results`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     // 🔥 safety check
     if (!res.data || res.data.length === 0) {
@@ -226,8 +247,9 @@ const fetchDailyAnalysis = async () => {
   // Fetch Question
   const getQuestion = async (selectedRole) => {
     const res = await axios.get(
-      `https://ai-interview-simulator-aknp.onrender.com/question?role=${selectedRole}`
+      `${API_URL}/question?role=${selectedRole}`
     );
+    setResumeMode(false);
     setQuestion(res.data.question);
     setStep(3);
     setTime(30); // reset timer
@@ -237,7 +259,73 @@ setStartTime(Date.now());
 
   const startInterview = (selectedRole) => {
     setRole(selectedRole);
+    setAskedQuestions([]);
+    setSessionLog([]);
     getQuestion(selectedRole);
+  };
+
+  //=======================
+  // TEXT-TO-SPEECH — AI reads the question out loud
+  //=======================
+  const speakText = (text) => {
+    if (!ttsEnabled || !text) return;
+    if (!window.speechSynthesis) return; // not supported in this browser
+
+    window.speechSynthesis.cancel(); // stop any previous utterance
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // speak automatically whenever a new question is shown
+  useEffect(() => {
+    if (step === 3 && question) {
+      speakText(question);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question, step]);
+
+  //=======================
+  // RESUME-TAILORED INTERVIEW
+  //=======================
+  const uploadResumeAndStart = async () => {
+    if (!resumeFile) return;
+
+    setResumeUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("resume", resumeFile);
+
+      const parseRes = await axios.post(`${API_URL}/parse-resume`, formData);
+
+      const extractedText = parseRes.data.resumeText;
+      setResumeText(extractedText);
+      setResumeMode(true);
+      setRole("Resume-tailored Interview");
+      setAskedQuestions([]);
+      setSessionLog([]);
+
+      await getResumeQuestion(extractedText, []);
+    } catch (err) {
+      console.error(err);
+      alert("Could not process that resume. Try a different PDF.");
+    } finally {
+      setResumeUploading(false);
+    }
+  };
+
+  const getResumeQuestion = async (text, asked) => {
+    const res = await axios.post(`${API_URL}/resume-question`, {
+      resumeText: text,
+      askedQuestions: asked,
+    });
+    setQuestion(res.data.question);
+    setAskedQuestions([...asked, res.data.question]);
+    setStep(3);
+    setTime(30);
+    setTimeLeft(30);
+    setStartTime(Date.now());
   };
 
   // Submit Answer
@@ -249,14 +337,14 @@ setStartTime(Date.now());
      );
        const token = localStorage.getItem("token");
 
-    const res = await axios.post("https://ai-interview-simulator-aknp.onrender.com/evaluate", {
+    const res = await axios.post(`${API_URL}/evaluate`, {
       question,
       answer,
       role,
     },
    {
       headers: {
-        Authorization: token,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -273,8 +361,65 @@ setStartTime(Date.now());
     const score = match ? parseInt(match[1]) : 0;
 
     setScores([...scores, score]);
+    setSessionLog(prev => [
+      ...prev,
+      {
+        question,
+        answer,
+        feedback: res.data.feedback,
+        score,
+        timeTaken: secondsTaken,
+      },
+    ]);
 
     setStep(4);
+  };
+
+  //=======================
+  // EXPORT SESSION AS PDF
+  //=======================
+  const exportSessionPDF = () => {
+    const doc = new jsPDF();
+    const marginLeft = 14;
+    let y = 20;
+
+    doc.setFontSize(16);
+    doc.text("Interview Session Report", marginLeft, y);
+    y += 10;
+
+    doc.setFontSize(11);
+    doc.text(`Role: ${role || "N/A"}`, marginLeft, y);
+    y += 7;
+    doc.text(`Average Score: ${avg}/10`, marginLeft, y);
+    y += 7;
+    doc.text(`Confidence: ${confidence}/10`, marginLeft, y);
+    y += 10;
+
+    sessionLog.forEach((entry, i) => {
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFont(undefined, "bold");
+      const qLines = doc.splitTextToSize(`Q${i + 1}: ${entry.question}`, 180);
+      doc.text(qLines, marginLeft, y);
+      y += qLines.length * 6 + 3;
+
+      doc.setFont(undefined, "normal");
+      doc.text(`Score: ${entry.score}/10  |  Time taken: ${entry.timeTaken}s`, marginLeft, y);
+      y += 7;
+
+      const feedbackLines = doc.splitTextToSize(entry.feedback, 180);
+      if (y + feedbackLines.length * 6 > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(feedbackLines, marginLeft, y);
+      y += feedbackLines.length * 6 + 8;
+    });
+
+    doc.save(`interview-report-${Date.now()}.pdf`);
   };
 
   // 📈 Average Score
@@ -584,15 +729,55 @@ setStartTime(Date.now());
                 </button>
               </div>
             </div>
+
+            <div className="border-t border-edge pt-4 mt-4">
+              <p className="text-sm text-gray-500 mb-2">
+                Or generate questions tailored to your resume.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setResumeFile(e.target.files[0] || null)}
+                  className="flex-1 text-sm text-gray-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border file:border-edge file:bg-surface2 file:text-gray-300 file:text-sm"
+                />
+                <button
+                  className="bg-accent text-ink text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-accent-dim disabled:opacity-40 disabled:hover:bg-accent transition-colors"
+                  disabled={!resumeFile || resumeUploading}
+                  onClick={uploadResumeAndStart}
+                >
+                  {resumeUploading ? "Reading resume..." : "Start"}
+                </button>
+              </div>
+            </div>
           </>
         )}
 
         {/* QUESTION */}
         {step === 3 && (
           <>
-            <p className="font-mono text-xs tracking-widest text-accent uppercase mb-2">
-              {role}
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-mono text-xs tracking-widest text-accent uppercase">
+                {role}
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  className="text-xs text-gray-400 hover:text-gray-100 transition-colors"
+                  onClick={() => speakText(question)}
+                >
+                  Replay question
+                </button>
+                <button
+                  className="text-xs text-gray-400 hover:text-gray-100 transition-colors"
+                  onClick={() => {
+                    if (ttsEnabled) window.speechSynthesis?.cancel();
+                    setTtsEnabled(!ttsEnabled);
+                  }}
+                >
+                  Voice: {ttsEnabled ? "On" : "Off"}
+                </button>
+              </div>
+            </div>
             <div className="rounded-xl border border-edge bg-ink/40 p-4 mb-4">
               <p className="font-mono text-[13px] text-gray-200 leading-relaxed">
                 &gt; {question}
@@ -638,7 +823,11 @@ setStartTime(Date.now());
                 if (currentQ < TOTAL_QUESTIONS) {
                   setCurrentQ(currentQ + 1);
                   setAnswer("");
-                  getQuestion(role);
+                  if (resumeMode) {
+                    getResumeQuestion(resumeText, askedQuestions);
+                  } else {
+                    getQuestion(role);
+                  }
                 } else {
                   setStep(5);
                 }
@@ -666,6 +855,12 @@ setStartTime(Date.now());
               </h2>
             </div>
             <div className="flex gap-3">
+              <button
+                className="border border-edge text-gray-300 text-sm font-medium px-4 py-2.5 rounded-lg hover:border-gray-500 hover:text-gray-100 transition-colors"
+                onClick={exportSessionPDF}
+              >
+                Download PDF
+              </button>
               <button
                 className="border border-edge text-gray-300 text-sm font-medium px-4 py-2.5 rounded-lg hover:border-gray-500 hover:text-gray-100 transition-colors"
                 onClick={goToDashboardStats}

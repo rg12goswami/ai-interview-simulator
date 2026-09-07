@@ -6,10 +6,12 @@ import Groq from "groq-sdk";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import auth from "./middleware/auth.js";
+import rateLimit from "express-rate-limit";
+import multer from "multer";
+import { PDFParse } from "pdf-parse";
 
 
 dotenv.config();
- console.log("MONGO URI:", process.env.MONGO_URI);
 import mongoose from "mongoose";
 import Result from "./models/Result.js";
 import User from "./models/User.js";
@@ -51,6 +53,17 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Limits login/signup attempts to slow down brute-force / credential
+// stuffing. 20 requests per 15 min per IP is generous for real users,
+// tight enough to blunt automated guessing.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many attempts. Please try again later." },
+});
+
 // ========================
 // 🔥 TOGGLE
 // ========================
@@ -73,9 +86,21 @@ app.get("/", (req, res) => {
 // =========================
 //SIGN UP
 //==========================
-app.post("/signup", async (req, res) => {
+app.post("/signup", authLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters",
+      });
+    }
 
     const existingUser = await User.findOne({ email });
 
@@ -107,9 +132,15 @@ app.post("/signup", async (req, res) => {
 // =============================
 // LOGIN
 // =============================
-app.post("/login", async (req, res) => {
+app.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
 
     const user = await User.findOne({ email });
 
@@ -142,7 +173,11 @@ app.post("/login", async (req, res) => {
 
     res.json({
       token,
-      user,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
 
   } catch (err) {
@@ -241,6 +276,80 @@ Rules:
     res.status(500).json({ error: "Question error" });
   }
 });
+
+// ========================
+// RESUME-TAILORED INTERVIEW
+// ========================
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+});
+
+// Upload a resume PDF, extract its text
+app.post("/parse-resume", upload.single("resume"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No resume file uploaded" });
+    }
+
+    const parser = new PDFParse({ data: req.file.buffer });
+    const result = await parser.getText();
+
+    // keep prompt size sane
+    const resumeText = result.text.slice(0, 6000);
+
+    res.json({ resumeText });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not parse resume" });
+  }
+});
+
+// Generate a question tailored to the candidate's resume content
+app.post("/resume-question", async (req, res) => {
+  try {
+    const { resumeText, askedQuestions = [] } = req.body;
+
+    if (!resumeText) {
+      return res.status(400).json({ error: "resumeText is required" });
+    }
+
+    const prompt = `
+You are an expert technical interviewer reviewing this candidate's resume:
+
+"""
+${resumeText}
+"""
+
+Generate ONE concise interview question that probes a specific skill, project, or technology mentioned in the resume above.
+
+Rules:
+- Reference something specific from the resume (a named project, technology, or claim)
+- Do not give the answer
+- Keep it short and interview-level
+- Do not repeat any of these already-asked questions: ${askedQuestions.join(" | ") || "none"}
+- Only return the question text
+`;
+
+    const response = await groq.chat.completions.create({
+      model: "openai/gpt-oss-120b",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    const question = response.choices[0].message.content.trim();
+
+    res.json({ question });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Resume question error" });
+  }
+});
+
 // ========================
 // EVALUATE API (SAFE)
 // ========================
@@ -326,9 +435,9 @@ const score = scoreMatch
 // ========================
 // RESULTS API
 // ========================
-app.get("/results", async (req, res) => {
+app.get("/results", auth, async (req, res) => {
   try {
-    const data = await Result.find().sort({ date: -1 });
+    const data = await Result.find({ userId: req.user.id }).sort({ date: -1 });
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: "Error fetching results" });
